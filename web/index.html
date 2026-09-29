@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clipnest — Video Downloader</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/workflow.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/"><span class="brand-mark">↘</span><span>clipnest<span class="brand-dot">.</span></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <a class="nav-item active" href="#overview"><span>◫</span> Overview</a>
+        <a class="nav-item" href="#folders"><span>▤</span> Folders</a>
+        <a class="nav-item" href="#queue"><span>◷</span> Queue</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="mini-icon">✦</div>
+        <strong>Your videos, organized.</strong>
+        <p>Bring links together and keep every download in its place.</p>
+        <span class="local-tag"><span class="online-dot"></span> Running locally</span>
+      </div>
+    </aside>
+
+    <main id="overview">
+      <header class="topbar">
+        <div class="breadcrumb">Workspace <span>/</span> Overview</div>
+        <div class="top-right"><span class="top-pill">● Local workspace</span><span class="avatar">C</span></div>
+      </header>
+      <div class="content">
+        <section class="hero">
+          <div class="hero-copy">
+            <span class="eyebrow"><span>✦</span> YOUR DOWNLOAD STUDIO</span>
+            <h1>Everything worth saving,<br><em>beautifully organized.</em></h1>
+            <p>Choose your creator folders, then download new videos directly into each one.</p>
+            <button id="chooseRootHero" class="button button-white"><span class="button-icon">⌑</span> Choose a folder <span class="arrow">↗</span></button>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+            <div class="art-card card-back"><span>▶</span><i></i><i></i></div>
+            <div class="art-card card-front"><div class="art-play">▶</div><div class="art-lines"><i></i><i></i></div><span class="art-check">✓</span></div>
+            <span class="spark spark-one">✦</span><span class="spark spark-two">✦</span>
+          </div>
+        </section>
+
+        <section class="stats" aria-label="Workspace summary">
+          <div class="stat-card"><span class="stat-icon lavender">▤</span><div><span class="stat-label">Creator folders</span><strong id="statFolders">0</strong></div></div>
+          <div class="stat-card"><span class="stat-icon peach">▶</span><div><span class="stat-label">Existing videos</span><strong id="statVideos">0</strong></div></div>
+          <div class="stat-card"><span class="stat-icon mint">↓</span><div><span class="stat-label">Completed jobs</span><strong id="statDone">0</strong></div></div>
+          <div class="stat-card"><span class="stat-icon blue">◷</span><div><span class="stat-label">In progress</span><strong id="statActive">0</strong></div></div>
+        </section>
+
+        <div class="grid">
+          <section class="panel folders-panel" id="folders">
+            <div class="panel-head"><div><span class="section-kicker">STEP 01</span><h2>Select creators</h2><p>Choose a root folder, then select its creator subfolders.</p></div><button id="rescan" class="icon-button" title="Rescan folders" aria-label="Rescan folders">↻</button></div>
+            <div class="root-row"><span class="root-icon">▤</span><div><small>ROOT FOLDER</small><strong id="rootPath">No folder selected</strong></div><button id="chooseRoot" class="text-button">Change ↗</button></div>
+            <div class="folder-list" id="folderList"><div class="empty">Choose a root folder to see its creator folders.</div></div>
+            <div class="panel-foot"><span id="selectionCount">0 selected · Sorted by fewest videos</span><div class="selection-actions"><button id="selectUnder" class="text-button">Select under 10 videos</button><button id="selectAll" class="text-button">Select all</button></div></div>
+          </section>
+
+          <section class="panel setup-panel">
+            <div class="panel-head"><div><span class="section-kicker">STEP 02</span><h2>Start downloads</h2><p>We use each selected folder name as its creator username.</p></div></div>
+            <span class="field-label">PLATFORM</span>
+            <div class="platform-row" role="group" aria-label="Platform">
+              <button class="platform selected" data-platform="tiktok" aria-pressed="true"><span>♪</span> TikTok</button>
+              <button class="platform" data-platform="youtube" aria-pressed="false"><span>▶</span> YouTube Shorts</button>
+              <button class="platform" data-platform="instagram" aria-pressed="false"><span>◎</span> Instagram</button>
+            </div>
+            <div class="settings-grid">
+              <label><span>Videos per creator <small>0 = all</small></span><input id="limit" type="number" min="0" max="10000" value="10"></label>
+              <label><span>At the same time <small>1–8</small></span><input id="concurrency" type="number" min="1" max="8" value="2"></label>
+            </div>
+            <details class="cookie-settings" id="cookieSettings"><summary>⚙ Cookie settings <span>Saved automatically</span></summary><label for="cookieBrowser">Use cookies from browser</label><select id="cookieBrowser"><option value="">None</option><option value="chrome">Chrome</option><option value="edge">Edge</option><option value="firefox">Firefox</option></select><label for="cookiefile" class="cookie-paste-label">Or use a Netscape cookies file</label><div class="cookie-row"><input id="cookiefile" type="text" placeholder="Choose or paste a cookies.txt path" autocomplete="off"><button id="browseCookies" type="button" class="button button-outline">Browse</button></div><label for="cookiesText" class="cookie-paste-label">Or paste cookies.txt contents</label><textarea id="cookiesText" placeholder="# Netscape HTTP Cookie File&#10;..." spellcheck="false"></textarea><small>Pasted text takes priority, then file, then browser. Settings are encrypted and saved on this computer for each platform.</small><div class="cookie-footer"><span id="cookieSaveStatus" role="status" aria-live="polite">Loading saved cookies…</span><button id="clearCookies" type="button" class="text-button">Clear saved cookies</button></div></details>
+            <button id="addQueue" class="button button-primary"><span>↓</span> Download selected creators <span class="arrow">→</span></button>
+            <div class="notice" id="notice" role="status" aria-live="polite"></div>
+          </section>
+        </div>
+
+        <section class="panel queue-panel" id="queue">
+          <div class="panel-head queue-head"><div><span class="section-kicker">YOUR ACTIVITY</span><h2>Download queue <span id="queueBadge">0</span></h2><p>Watch your downloads come together in real time.</p></div><button id="stop" class="button button-outline" disabled>Stop downloads</button></div>
+          <div class="queue-list" id="queueList"><div class="queue-empty"><span>↓</span><strong>Your queue is looking a little quiet</strong><p>Select creator folders above to get things moving.</p></div></div>
+        </section>
+        <footer>Made for your collection <span>✦</span> Downloads stay on your computer</footer>
+      </div>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

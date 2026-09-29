@@ -1,0 +1,3 @@
+yt-dlp[default]==2026.9.27.232945.dev0
+curl-cffi>=0.16.3
+chardet>=7.6.0
