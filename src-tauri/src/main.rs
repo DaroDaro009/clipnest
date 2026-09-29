@@ -22,10 +22,14 @@ fn main() {
             let server_path = app
                 .path()
                 .resolve("binaries/clipnest-server.exe", BaseDirectory::Resource)?;
+            let mut bundled_path = server_path.parent().unwrap().as_os_str().to_os_string();
+            bundled_path.push(";");
+            bundled_path.push(std::env::var_os("PATH").unwrap_or_default());
             let mut command = Command::new(server_path);
             command
                 .env("CLIPNEST_TAURI", "1")
                 .env("CLIPNEST_PORT", port.to_string())
+                .env("PATH", bundled_path)
                 .stdin(Stdio::null())
                 .stdout(Stdio::null())
                 .stderr(Stdio::null());

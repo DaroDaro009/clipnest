@@ -451,6 +451,7 @@ class State:
                 destination = self.root / job.folder
             finished_count = 0
             fallback_attempted = False
+            retry_without_cookies = False
             def check_stopped() -> None:
                 if cancel_event.is_set():
                     raise DownloadStopped()
@@ -492,6 +493,8 @@ class State:
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
                 )
+            elif job.platform == "youtube":
+                options["js_runtimes"] = {"node": {}}
             if cookies_text:
                 with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".txt", prefix="clipnest-cookies-", delete=False) as temp:
                     temp.write(cookies_text.replace("\r\n", "\n"))
@@ -557,10 +560,14 @@ class State:
                 try:
                     result = downloader.download([job.url])
                 except yt_dlp.utils.DownloadError as first_error:
-                    if job.platform != "tiktok" or "secondary user ID" not in str(first_error):
+                    if (job.platform == "youtube" and "page needs to be reloaded" in str(first_error).lower()
+                            and any(key in options for key in ("cookiefile", "cookiesfrombrowser"))):
+                        retry_without_cookies = True
+                    elif job.platform == "tiktok" and "secondary user ID" in str(first_error):
+                        fallback_attempted = True
+                        result = download_tiktok_fallback()
+                    else:
                         raise
-                    fallback_attempted = True
-                    result = download_tiktok_fallback()
                 if job.platform == "tiktok" and result != 0 and not fallback_attempted:
                     fallback_attempted = True
                     result = download_tiktok_fallback()
@@ -574,6 +581,17 @@ class State:
                             "TikTok returned no downloadable public videos for this creator."
                         )
                 check_stopped()
+            if retry_without_cookies:
+                with self.lock:
+                    job.status = "Starting"
+                    job.detail = "YouTube rejected the saved cookies. Retrying public Shorts without cookies."
+                public_options = {key: value for key, value in options.items()
+                                  if key not in ("cookiefile", "cookiesfrombrowser")}
+                with yt_dlp.YoutubeDL(public_options) as downloader:
+                    downloader.add_post_processor(TitleNumberPP(), when="after_move")
+                    check_stopped()
+                    result = downloader.download([job.url])
+                    check_stopped()
             with self.lock:
                 job.status = "Done" if result == 0 else "Failed"
                 job.progress = 100 if result == 0 else job.progress

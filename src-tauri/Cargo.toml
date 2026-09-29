@@ -1,6 +1,6 @@
 [package]
 name = "clipnest-desktop"
-version = "0.1.1"
+version = "0.1.2"
 description = "Clipnest creator video downloader"
 authors = ["Clipnest"]
 edition = "2021"

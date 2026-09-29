@@ -14,10 +14,11 @@ python -m pip install -r requirements.txt pyinstaller
 npm ci
 python -m unittest discover -s tests -v
 python build_sidecar.py
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare_windows_runtime.ps1
 npm run tauri build
 ```
 
-The Windows setup file is written to `src-tauri/target/release/bundle/nsis/`. `build_sidecar.py` first packages `web_app.py` as a windowless executable inside the installer. The installed Tauri app starts that service on a private localhost port and stops it when the window closes.
+The Windows setup file is written to `src-tauri/target/release/bundle/nsis/`. `build_sidecar.py` first packages `web_app.py` as a windowless executable inside the installer. The runtime preparation script copies Node.js from the installed build toolchain into the bundle, along with its license, so YouTube's JavaScript challenges work without a separate installation. The installed Tauri app starts the service on a private localhost port and stops it when the window closes.
 
 Never commit `.clipnest-cookies.dat`, `.clipnest-root.txt`, `.clipnest-tiktok-ids.json`, downloaded videos, `.vendor/`, `.build-tools/`, or the generated installer. The setup file belongs on a GitHub Release, not in the source tree.
 

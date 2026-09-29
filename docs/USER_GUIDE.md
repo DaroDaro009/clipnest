@@ -27,7 +27,7 @@ Choose **Videos** as the root folder. Clipnest treats each subfolder name as a c
 1. Select the platform: TikTok, YouTube, or Instagram.
 2. Click **Choose folder** and select your root folder.
 3. Review the video counts. Folders with zero videos appear first.
-4. Select folders individually, use **Select all**, or choose folders under the current video count threshold.
+4. Select folders individually, use **Select all**, or choose folders under the current video count threshold. Use **Copy** beside a folder to copy its username.
 5. Set **Videos per creator**. A value of `0` asks for every video the platform makes available. Set concurrency from 1 to 8.
 6. Click **Download selected creators**. Watch the queue for progress, titles, and errors.
 
@@ -45,7 +45,8 @@ Cookie settings stay on your computer. Do not share your cookies, account sessio
 
 - **TikTok creator ID or security challenge:** Open the creator profile in your browser and refresh the saved TikTok cookies. Clipnest also tries TikTok's public creator embed, but TikTok may block both routes.
 - **No public videos:** The creator page may be empty, private, or unavailable from your location. A public embed can show fewer posts than the full profile.
-- **YouTube or Instagram error:** Confirm the creator username and that the posts are accessible in your browser. Some videos require a logged-in account.
-- **Merging or format error:** Installing FFmpeg on your computer can improve video and audio merging. A JavaScript runtime such as Deno may help with some YouTube formats.
+- **YouTube "page needs to be reloaded":** Clipnest retries public Shorts without cookies. If the retry fails, confirm the creator username and that the Short is accessible in your browser. Videos requiring a logged-in account may still fail.
+- **Other YouTube or Instagram error:** Confirm the creator username and that the posts are accessible in your browser. Some videos require a logged-in account.
+- **Merging or format error:** Installing FFmpeg on your computer can improve video and audio merging. Clipnest includes Node.js for YouTube's JavaScript challenges.
 
 The queue shows the error for each creator. You can retry a failed folder after changing its settings.

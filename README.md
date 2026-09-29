@@ -4,7 +4,7 @@ Clipnest is a Windows desktop app that saves videos from selected TikTok, YouTub
 
 ## Download for Windows
 
-Get **Clipnest Setup.exe** from the [latest GitHub release](https://github.com/DaroDaro009/clipnest/releases/latest). Run the setup file, then open Clipnest from the Start menu. You do not need Python, Node.js, or Rust to use the installed app.
+Get **Clipnest Setup.exe** from the [latest GitHub release](https://github.com/DaroDaro009/clipnest/releases/latest). Run the setup file, then open Clipnest from the Start menu. You do not need to install Python, Node.js, or Rust; the YouTube JavaScript runtime is bundled.
 
 See the [user guide](docs/USER_GUIDE.md) for folder setup, cookies, limits, and troubleshooting. Developers can use the [build guide](docs/BUILDING.md).
 
@@ -12,10 +12,10 @@ See the [user guide](docs/USER_GUIDE.md) for folder setup, cookies, limits, and 
 
 1. Make a root folder with one subfolder per creator. For example, `Videos/ethan.hunt398/` is the TikTok creator `https://www.tiktok.com/@ethan.hunt398`.
 2. Choose that root folder in Clipnest and select TikTok, YouTube, or Instagram.
-3. Select creator folders, set the number of videos per creator and concurrent downloads, then start the queue.
+3. Select creator folders, use **Copy** beside a folder to copy its username, set the number of videos per creator and concurrent downloads, then start the queue.
 4. Videos are saved into their existing creator folders using video titles. Repeated titles get `(2)`, `(3)`, and so on. The app remembers downloaded video IDs to avoid duplicates.
 
-YouTube uses creator **Shorts** pages only. TikTok sometimes blocks its main profile page; Clipnest then tries the public creator embed, which may expose only recent public posts. Some profiles or videos cannot be accessed even with cookies. Instagram profile extraction can also fail when its site changes.
+YouTube uses creator **Shorts** pages only. If YouTube rejects saved cookies with a "page needs to be reloaded" error, Clipnest retries public Shorts without cookies. YouTube may still restrict some videos. TikTok sometimes blocks its main profile page; Clipnest then tries the public creator embed, which may expose only recent public posts. Some profiles or videos cannot be accessed even with cookies. Instagram profile extraction can also fail when its site changes.
 
 Download only content you have permission to save and follow each platform's rules.
 

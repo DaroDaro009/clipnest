@@ -56,6 +56,27 @@ function saveCookieSoon(name) {
   cookieSaveTimers[name] = setTimeout(() => saveCookieSettings(name).catch(error => { if (name === platform) $('cookieSaveStatus').textContent = 'Save failed'; notice(error.message, true); }), 500);
 }
 
+async function copyUsername(name) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(name);
+    } else {
+      const field = document.createElement('textarea');
+      field.value = name;
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.append(field);
+      field.select();
+      const copied = document.execCommand('copy');
+      field.remove();
+      if (!copied) throw new Error('Clipboard unavailable');
+    }
+    notice(`Copied username: ${name}`);
+  } catch (_) {
+    notice('Could not copy the username. Select the folder name and copy it manually.', true);
+  }
+}
+
 function renderFolders() {
   const list = $('folderList');
   list.replaceChildren();
@@ -65,6 +86,8 @@ function renderFolders() {
     list.innerHTML = '<div class="empty">No subfolders found. Add creator username folders inside the root folder, then rescan.</div>';
   } else {
     for (const folder of folders) {
+      const item = document.createElement('div');
+      item.className = 'folder-item' + (selected.has(folder.name) ? ' selected' : '');
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'folder-row' + (selected.has(folder.name) ? ' selected' : '');
@@ -83,7 +106,15 @@ function renderFolders() {
       count.textContent = folder.valid ? `${folder.count} video${folder.count === 1 ? '' : 's'}` : 'Invalid username';
       row.append(checkbox, glyph, name, count);
       row.onclick = () => { selected.has(folder.name) ? selected.delete(folder.name) : selected.add(folder.name); renderFolders(); };
-      list.append(row);
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'copy-name';
+      copy.textContent = 'Copy';
+      copy.title = `Copy ${folder.name}`;
+      copy.setAttribute('aria-label', `Copy username ${folder.name}`);
+      copy.onclick = () => copyUsername(folder.name);
+      item.append(row, copy);
+      list.append(item);
     }
   }
   $('selectionCount').textContent = `${selected.size} selected · Sorted by fewest videos`;

@@ -61,6 +61,48 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(state.pending.empty())
         state.executor.shutdown(wait=True)
 
+    def test_youtube_reload_error_retries_public_shorts_without_cookies(self):
+        state = web_app.State()
+        state.root = web_app.HERE
+        job = web_app.Download(str(uuid.uuid4()), "youtube", "creator_name", "https://www.youtube.com/@creator_name/shorts")
+        state.jobs.append(job)
+        state.cancel_events[job.id] = threading.Event()
+        state.active = 1
+        attempts = []
+
+        class FakeDownloader:
+            def __init__(self, options):
+                attempts.append(options)
+                self.options = options
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def add_post_processor(self, *_args, **_kwargs):
+                pass
+
+            def download(self, _urls):
+                if "cookiesfrombrowser" in self.options:
+                    raise RuntimeError("ERROR: [youtube] The page needs to be reloaded.")
+                return 0
+
+        fake_yt_dlp = types.SimpleNamespace(
+            YoutubeDL=FakeDownloader,
+            postprocessor=types.SimpleNamespace(PostProcessor=object),
+            utils=types.SimpleNamespace(DownloadError=RuntimeError),
+        )
+        with patch.dict(sys.modules, {"yt_dlp": fake_yt_dlp}):
+            state._download(job, 1, "", "", "chrome")
+
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(attempts[0]["js_runtimes"], {"node": {}})
+        self.assertNotIn("cookiesfrombrowser", attempts[1])
+        self.assertEqual(job.status, "Done")
+        state.executor.shutdown(wait=True)
+
 
 if __name__ == "__main__":
     unittest.main()

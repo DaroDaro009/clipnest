@@ -30,6 +30,9 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Build hidden downloader
         run: python build_sidecar.py
+      - name: Bundle YouTube JavaScript runtime
+        shell: pwsh
+        run: ./scripts/prepare_windows_runtime.ps1
       - name: Build and publish installer
         uses: tauri-apps/tauri-action@v1
         env:
