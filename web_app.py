@@ -478,7 +478,10 @@ class State:
             has_ffmpeg = shutil.which("ffmpeg") is not None
             options = {
                 "outtmpl": str(destination / "%(title).180B [%(id)s].%(ext)s"),
-                "format": "bestvideo*+bestaudio/best" if has_ffmpeg else "best[ext=mp4]/best",
+                "format": (
+                    "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo*+bestaudio/best"
+                    if has_ffmpeg else "best[ext=mp4]/best"
+                ),
                 "merge_output_format": "mp4" if has_ffmpeg else None,
                 "playlistend": limit or None,
                 "download_archive": str(destination / ".video-downloader-archive.txt"),

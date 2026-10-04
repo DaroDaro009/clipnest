@@ -94,11 +94,13 @@ class WorkflowTests(unittest.TestCase):
             postprocessor=types.SimpleNamespace(PostProcessor=object),
             utils=types.SimpleNamespace(DownloadError=RuntimeError),
         )
-        with patch.dict(sys.modules, {"yt_dlp": fake_yt_dlp}):
+        with patch.dict(sys.modules, {"yt_dlp": fake_yt_dlp}), patch("web_app.shutil.which", return_value="ffmpeg.exe"):
             state._download(job, 1, "", "", "chrome")
 
         self.assertEqual(len(attempts), 2)
         self.assertEqual(attempts[0]["js_runtimes"], {"node": {}})
+        self.assertEqual(attempts[0]["format"], "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo*+bestaudio/best")
+        self.assertEqual(attempts[0]["merge_output_format"], "mp4")
         self.assertNotIn("cookiesfrombrowser", attempts[1])
         self.assertEqual(job.status, "Done")
         state.executor.shutdown(wait=True)

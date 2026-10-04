@@ -33,6 +33,9 @@ jobs:
       - name: Bundle YouTube JavaScript runtime
         shell: pwsh
         run: ./scripts/prepare_windows_runtime.ps1
+      - name: Bundle video merger
+        shell: pwsh
+        run: ./scripts/prepare_ffmpeg.ps1
       - name: Build and publish installer
         uses: tauri-apps/tauri-action@v1
         env:

@@ -47,6 +47,6 @@ Cookie settings stay on your computer. Do not share your cookies, account sessio
 - **No public videos:** The creator page may be empty, private, or unavailable from your location. A public embed can show fewer posts than the full profile.
 - **YouTube "page needs to be reloaded":** Clipnest retries public Shorts without cookies. If the retry fails, confirm the creator username and that the Short is accessible in your browser. Videos requiring a logged-in account may still fail.
 - **Other YouTube or Instagram error:** Confirm the creator username and that the posts are accessible in your browser. Some videos require a logged-in account.
-- **Merging or format error:** Installing FFmpeg on your computer can improve video and audio merging. Clipnest includes Node.js for YouTube's JavaScript challenges.
+- **Merging or format error:** Install the latest Clipnest setup. It includes FFmpeg to combine YouTube's separate video and audio streams, and Node.js for YouTube's JavaScript challenges.
 
 The queue shows the error for each creator. You can retry a failed folder after changing its settings.
