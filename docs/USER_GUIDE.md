@@ -33,6 +33,8 @@ Choose **Videos** as the root folder. Clipnest treats each subfolder name as a c
 
 **Stop downloads** clears waiting jobs and interrupts active transfers at their next progress update. A partial file may resume when you try again. **Rescan** refreshes the folder counts. An archive file inside each creator folder helps prevent duplicate downloads. Files use their video titles; repeated titles are numbered.
 
+For YouTube, a **Partial** result means some Shorts were saved and others failed. Clipnest continues to the next Short after an individual download error. Start with concurrency **1** if you see connection failures or HTTP 403 errors.
+
 YouTube downloads come from each creator's **Shorts** tab. Regular YouTube videos are excluded.
 
 ## Cookies
@@ -48,5 +50,7 @@ Cookie settings stay on your computer. Do not share your cookies, account sessio
 - **YouTube "page needs to be reloaded":** Clipnest retries public Shorts without cookies. If the retry fails, confirm the creator username and that the Short is accessible in your browser. Videos requiring a logged-in account may still fail.
 - **Other YouTube or Instagram error:** Confirm the creator username and that the posts are accessible in your browser. Some videos require a logged-in account.
 - **Merging or format error:** Install the latest Clipnest setup. It includes FFmpeg to combine YouTube's separate video and audio streams, and Node.js for YouTube's JavaScript challenges.
+- **YouTube DNS error (`getaddrinfo failed`):** Windows could not find YouTube's video server. Check this PC's network, VPN, and DNS settings. Clipnest uses IPv4 for YouTube, but cannot repair a broken DNS connection.
+- **YouTube HTTP 403:** YouTube refused a video request. Try one creator at a time and check the YouTube cookie setting on this PC. Some videos may remain unavailable.
 
 The queue shows the error for each creator. You can retry a failed folder after changing its settings.

@@ -351,8 +351,21 @@ class Download:
     title: str = ""
 
 
-class DownloadStopped(Exception):
-    """Raised by yt-dlp hooks after the user stops the queue."""
+class DownloadStopped(BaseException):
+    """Escape yt-dlp's error-skipping handlers when the user stops the queue."""
+
+
+def explain_download_error(message: str, platform: str, saved_count: int = 0) -> str:
+    detail = str(message).replace("\n", " ")
+    if platform != "youtube":
+        return detail
+    prefix = f"Saved {saved_count} video(s); others failed. " if saved_count else ""
+    lowered = detail.lower()
+    if "getaddrinfo failed" in lowered or "name or service not known" in lowered:
+        return prefix + "This PC could not find YouTube's video server (DNS). Check its connection, VPN, or DNS settings, then retry. " + detail
+    if "http error 403" in lowered:
+        return prefix + "YouTube refused a video request (403). Try one creator at a time, and check the YouTube cookie setting on this PC. " + detail
+    return prefix + detail
 
 
 class State:
@@ -366,7 +379,7 @@ class State:
         self.jobs: list[Download] = []
         self.pending: queue.Queue[tuple[Download, int, str, str, str]] = queue.Queue()
         self.active = 0
-        self.concurrency = 2
+        self.concurrency = 1
         self.stopping = False
         self.cancel_events: dict[str, threading.Event] = {}
         self.executor = ThreadPoolExecutor(max_workers=8)
@@ -450,8 +463,20 @@ class State:
                 assert self.root is not None
                 destination = self.root / job.folder
             finished_count = 0
+            saved_count = 0
             fallback_attempted = False
             retry_without_cookies = False
+            download_errors: list[str] = []
+
+            class DownloadLogger:
+                def debug(self, _message: str) -> None:
+                    pass
+
+                def warning(self, _message: str) -> None:
+                    pass
+
+                def error(self, message: str) -> None:
+                    download_errors.append(str(message))
             def check_stopped() -> None:
                 if cancel_event.is_set():
                     raise DownloadStopped()
@@ -490,6 +515,7 @@ class State:
                 "quiet": True,
                 "no_warnings": True,
                 "windowsfilenames": True,
+                "logger": DownloadLogger(),
             }
             if job.platform == "tiktok":
                 options["user_agent"] = (
@@ -498,6 +524,16 @@ class State:
                 )
             elif job.platform == "youtube":
                 options["js_runtimes"] = {"node": {}}
+                options["source_address"] = "0.0.0.0"
+                options["sleep_interval_requests"] = 0.5
+                options["sleep_interval"] = 1
+                options["retries"] = 3
+                options["fragment_retries"] = 3
+                options["retry_sleep_functions"] = {
+                    "http": lambda attempt: min(attempt * 2, 8),
+                    "fragment": lambda attempt: min(attempt * 2, 8),
+                }
+                options["ignoreerrors"] = "only_download"
             if cookies_text:
                 with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".txt", prefix="clipnest-cookies-", delete=False) as temp:
                     temp.write(cookies_text.replace("\r\n", "\n"))
@@ -509,8 +545,10 @@ class State:
                 options["cookiesfrombrowser"] = (browser,)
             class TitleNumberPP(yt_dlp.postprocessor.PostProcessor):
                 def run(self, info: dict) -> tuple[list, dict]:
+                    nonlocal saved_count
                     check_stopped()
-                    number_video_by_title(info, destination)
+                    if number_video_by_title(info, destination) is not None:
+                        saved_count += 1
                     return [], info
 
             with yt_dlp.YoutubeDL(options) as downloader:
@@ -560,6 +598,7 @@ class State:
                     )
 
                 check_stopped()
+                result = 1
                 try:
                     result = downloader.download([job.url])
                 except yt_dlp.utils.DownloadError as first_error:
@@ -571,6 +610,10 @@ class State:
                         result = download_tiktok_fallback()
                     else:
                         raise
+                if (job.platform == "youtube" and result != 0
+                        and any("page needs to be reloaded" in error.lower() for error in download_errors)
+                        and any(key in options for key in ("cookiefile", "cookiesfrombrowser"))):
+                    retry_without_cookies = True
                 if job.platform == "tiktok" and result != 0 and not fallback_attempted:
                     fallback_attempted = True
                     result = download_tiktok_fallback()
@@ -590,16 +633,23 @@ class State:
                     job.detail = "YouTube rejected the saved cookies. Retrying public Shorts without cookies."
                 public_options = {key: value for key, value in options.items()
                                   if key not in ("cookiefile", "cookiesfrombrowser")}
+                download_errors.clear()
                 with yt_dlp.YoutubeDL(public_options) as downloader:
                     downloader.add_post_processor(TitleNumberPP(), when="after_move")
                     check_stopped()
                     result = downloader.download([job.url])
                     check_stopped()
             with self.lock:
-                job.status = "Done" if result == 0 else "Failed"
-                job.progress = 100 if result == 0 else job.progress
+                job.status = "Done" if result == 0 else "Partial" if saved_count else "Failed"
+                job.progress = 100 if result == 0 or saved_count else job.progress
                 if result == 0:
                     job.detail = ""
+                elif download_errors:
+                    job.detail = explain_download_error(download_errors[-1], job.platform, saved_count)[:300]
+                elif saved_count:
+                    job.detail = f"Saved {saved_count} video(s), but some could not be downloaded."
+                elif job.platform == "youtube":
+                    job.detail = "YouTube did not download a Short. Try one creator at a time and check this PC's connection and cookie setting."
         except DownloadStopped:
             with self.lock:
                 job.status = "Stopped"
@@ -610,7 +660,9 @@ class State:
                     job.status = "Stopped"
                     job.detail = "Download stopped. An unfinished video can resume on the next attempt."
                     return
-                job.status = "Failed"
+                job.status = "Partial" if job.platform == "youtube" and saved_count else "Failed"
+                if saved_count:
+                    job.progress = 100
                 detail = str(exc).replace("\n", " ")
                 if job.platform == "tiktok" and ("secondary user ID" in detail or "does not have any videos posted" in detail):
                     detail = "TikTok profile could not be read. Try fresh browser cookies; yt-dlp may still fail on some profiles. " + detail
@@ -619,6 +671,8 @@ class State:
                         "TikTok did not return a usable video list. Open the profile in your browser, "
                         "then try again with refreshed cookies. " + detail
                     )
+                elif job.platform == "youtube":
+                    detail = explain_download_error(detail, job.platform, saved_count)
                 job.detail = detail[:300]
         finally:
             if temporary_cookie_path:
@@ -737,7 +791,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({"path": chosen or None})
             elif path == "/api/queue":
                 data = self._body()
-                count = STATE.add(data.get("platform", ""), data.get("folders", []), int(data.get("limit", 10)), int(data.get("concurrency", 2)), data.get("cookiefile", ""), data.get("cookies_text", ""), data.get("browser", ""))
+                count = STATE.add(data.get("platform", ""), data.get("folders", []), int(data.get("limit", 10)), int(data.get("concurrency", 1)), data.get("cookiefile", ""), data.get("cookies_text", ""), data.get("browser", ""))
                 self._json({"queued": count})
             elif path == "/api/cookies":
                 data = self._body()
