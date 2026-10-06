@@ -1,4 +1,4 @@
-from downloader import DownloaderApp
+from desktop import main
 
 
-DownloaderApp().mainloop()
+raise SystemExit(main())

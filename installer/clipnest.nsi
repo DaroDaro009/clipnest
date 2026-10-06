@@ -1,5 +1,5 @@
 !ifndef APP_VERSION
-  !define APP_VERSION "0.2.0"
+  !define APP_VERSION "0.2.1"
 !endif
 
 Unicode true
@@ -16,7 +16,7 @@ UninstPage instfiles
 
 Section "Clipnest" MainSection
   SetOutPath "$INSTDIR"
-  File "..\dist\Clipnest.exe"
+  File /r "..\dist\Clipnest\*"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   CreateDirectory "$SMPROGRAMS\Clipnest"
   CreateShortcut "$SMPROGRAMS\Clipnest\Clipnest.lnk" "$INSTDIR\Clipnest.exe"
@@ -31,6 +31,7 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\Clipnest\Uninstall Clipnest.lnk"
   RMDir "$SMPROGRAMS\Clipnest"
   Delete "$INSTDIR\Clipnest.exe"
+  RMDir /r "$INSTDIR\_internal"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Clipnest"

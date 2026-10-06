@@ -29,23 +29,27 @@ jobs:
         run: ./scripts/prepare_ffmpeg.ps1
       - name: Build native app
         run: python build_native.py
+      - name: Package portable app
+        shell: pwsh
+        run: Compress-Archive -Path dist/Clipnest/* -DestinationPath dist/Clipnest_0.2.1_x64-portable.zip
       - name: Build Windows setup
         shell: pwsh
         run: |
           choco install nsis --no-progress -y
           Push-Location installer
-          & 'C:\Program Files (x86)\NSIS\makensis.exe' /DAPP_VERSION=0.2.0 clipnest.nsi
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' /DAPP_VERSION=0.2.1 clipnest.nsi
           Pop-Location
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.2.0
-          name: Clipnest v0.2.0 — native Python desktop
+          tag_name: v0.2.1
+          name: Clipnest v0.2.1 — original interface, Python desktop
           body: |
-            Windows: download Clipnest_0.2.0_x64-setup.exe, install it, and open Clipnest from the Start menu.
-            The portable Clipnest.exe is also available. Both include yt-dlp, Node.js, and FFmpeg.
+            Windows: download Clipnest_0.2.1_x64-setup.exe, install it, and open Clipnest from the Start menu.
+            The original Clipnest interface now runs in a Python desktop window. A portable ZIP is also available; extract it before opening Clipnest.exe.
+            Both include yt-dlp, Node.js, FFmpeg, and the desktop UI runtime.
             See docs/USER_GUIDE.md for folder setup, cookies, and troubleshooting.
           files: |
-            dist/Clipnest.exe
-            dist/Clipnest_0.2.0_x64-setup.exe
+            dist/Clipnest_0.2.1_x64-portable.zip
+            dist/Clipnest_0.2.1_x64-setup.exe

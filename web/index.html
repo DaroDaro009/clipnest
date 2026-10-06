@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clipnest — Video Downloader</title>
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/workflow.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="workflow.css">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a class="brand" href="/"><span class="brand-mark">↘</span><span>clipnest<span class="brand-dot">.</span></span></a>
+      <a class="brand" href="#overview"><span class="brand-mark">↘</span><span>clipnest<span class="brand-dot">.</span></span></a>
       <div class="side-label">WORKSPACE</div>
       <nav aria-label="Main navigation">
         <a class="nav-item active" href="#overview"><span>◫</span> Overview</a>
@@ -87,6 +87,8 @@
       </div>
     </main>
   </div>
-  <script src="/app.js"></script>
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  <script src="desktop-bridge.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

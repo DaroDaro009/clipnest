@@ -2,7 +2,7 @@
 
 ## Install
 
-Open the [latest GitHub release](https://github.com/DaroDaro009/clipnest/releases/latest) and download `Clipnest_0.2.0_x64-setup.exe`. Run it, then open Clipnest from the Start menu. The optional `Clipnest.exe` runs without installation. Neither requires Python, Node.js, FFmpeg, WebView2, or a terminal on the new PC.
+Open the [latest GitHub release](https://github.com/DaroDaro009/clipnest/releases/latest) and download `Clipnest_0.2.1_x64-setup.exe`. Run it, then open Clipnest from the Start menu. The optional portable ZIP runs without installation after you extract the full folder and open `Clipnest.exe` inside it. Both show the same Clipnest interface as the earlier web version. Neither requires Python, Node.js, FFmpeg, WebView2, or a terminal on the new PC.
 
 ## Prepare creator folders
 

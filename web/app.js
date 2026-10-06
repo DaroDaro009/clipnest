@@ -10,6 +10,7 @@ const cookieBrowsers = { tiktok: '', youtube: '', instagram: '' };
 const cookieSaveTimers = {};
 
 async function api(path, options = {}) {
+  if (window.clipnestDesktop) return window.clipnestDesktop(path, options);
   const response = await fetch('/api/' + path, {
     ...options,
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
@@ -58,7 +59,9 @@ function saveCookieSoon(name) {
 
 async function copyUsername(name) {
   try {
-    if (navigator.clipboard?.writeText) {
+    if (window.clipnestDesktop) {
+      await api('copy-username', { method: 'POST', body: JSON.stringify({ name }) });
+    } else if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(name);
     } else {
       const field = document.createElement('textarea');
