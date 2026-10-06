@@ -2,17 +2,11 @@
 
 ## Install
 
-1. Open the [latest release](https://github.com/DaroDaro009/clipnest/releases/latest).
-2. Under **Assets**, download `Clipnest_..._x64-setup.exe`. The source code ZIP is for developers and is not the installer.
-3. Run the setup file and open Clipnest from the Start menu. Clipnest opens its own window. No terminal needs to stay open.
-
-Clipnest is built for 64-bit Windows. The installer may need an internet connection to obtain Microsoft's WebView2 runtime if it is missing. This release is not code signed, so Windows may show a publisher warning; verify that you obtained the file from this repository's release page before running it.
-
-To update, run the setup file from a newer release. Your chosen root folder and saved cookie settings are stored separately under `%LOCALAPPDATA%\Clipnest` and are not packaged into the installer.
+Open the [latest GitHub release](https://github.com/DaroDaro009/clipnest/releases/latest) and download `Clipnest_0.2.0_x64-setup.exe`. Run it, then open Clipnest from the Start menu. The optional `Clipnest.exe` runs without installation. Neither requires Python, Node.js, FFmpeg, WebView2, or a terminal on the new PC.
 
 ## Prepare creator folders
 
-Create a root folder containing one subfolder per creator username. Examples:
+Make one root folder with subfolders named after the creators:
 
 ```text
 Videos/
@@ -20,37 +14,30 @@ Videos/
   khunkaw.ri/
 ```
 
-Choose **Videos** as the root folder. Clipnest treats each subfolder name as a creator username for the selected platform. Do not put profile URLs in folder names. Existing videos stay in place; new videos go into the matching subfolder.
+Choose `Videos` in Clipnest. Each subfolder name is a creator username for the selected platform. Do not put full URLs in folder names. Existing videos stay in place; new videos go into the matching subfolder.
 
 ## Download
 
-1. Select the platform: TikTok, YouTube, or Instagram.
-2. Click **Choose folder** and select your root folder.
-3. Review the video counts. Folders with zero videos appear first.
-4. Select folders individually, use **Select all**, or choose folders under the current video count threshold. Use **Copy** beside a folder to copy its username.
-5. Set **Videos per creator**. A value of `0` asks for every video the platform makes available. Set concurrency from 1 to 8.
-6. Click **Download selected creators**. Watch the queue for progress, titles, and errors.
+1. Choose the root folder and TikTok, YouTube Shorts, or Instagram.
+2. Review the video counts. Folders with zero videos appear first.
+3. Select folders, use **Select all**, or use **Select under video limit**. **Copy username** copies the selected folder name.
+4. Set **Videos per creator** (`0` means all available) and **Concurrent downloads** (1–8). Start with 1 when testing a new PC.
+5. Click **Download selected**. The queue shows the current video title, progress, and status. Select a queue row to read its full status or error.
 
-**Stop downloads** clears waiting jobs and interrupts active transfers at their next progress update. A partial file may resume when you try again. **Rescan** refreshes the folder counts. An archive file inside each creator folder helps prevent duplicate downloads. Files use their video titles; repeated titles are numbered.
+**Stop downloads** cancels active work at its next progress update and marks waiting jobs Stopped. A partial transfer may resume on the next attempt. **Rescan** refreshes the folder counts. Completed files use video titles, with `(2)`, `(3)`, and so on for repeated titles. The archive file in each creator folder prevents downloading the same video ID again.
 
-For YouTube, a **Partial** result means some Shorts were saved and others failed. Clipnest continues to the next Short after an individual download error. Start with concurrency **1** if you see connection failures or HTTP 403 errors.
-
-YouTube downloads come from each creator's **Shorts** tab. Regular YouTube videos are excluded.
+YouTube uses each creator's **Shorts** tab only. A **Partial** result means at least one video was saved but another failed.
 
 ## Cookies
 
-Open **Cookie settings** if a platform needs your logged-in session. You can choose Chrome, Edge, or Firefox, select a Netscape-format `cookies.txt` file, or paste that file's contents. Clipnest saves these settings automatically and encrypts them for your Windows user account. Use **Clear saved cookies** to remove one platform's saved setting.
-
-Cookie settings stay on your computer. Do not share your cookies, account session, or the contents of `%LOCALAPPDATA%\Clipnest` with other users. Each person should enter their own cookies if needed.
+In **Cookie settings**, choose Chrome, Edge, or Firefox, select a Netscape `cookies.txt` file, or paste that file's contents. Settings are saved automatically for each platform and encrypted for your Windows account. **Clear** removes the current platform's saved cookie setting. Each person using Clipnest on another PC should enter their own cookies if needed; do not share account cookies or `%LOCALAPPDATA%\Clipnest`.
 
 ## If a download fails
 
-- **TikTok creator ID or security challenge:** Open the creator profile in your browser and refresh the saved TikTok cookies. Clipnest also tries TikTok's public creator embed, but TikTok may block both routes.
-- **No public videos:** The creator page may be empty, private, or unavailable from your location. A public embed can show fewer posts than the full profile.
-- **YouTube "page needs to be reloaded":** Clipnest retries public Shorts without cookies. If the retry fails, confirm the creator username and that the Short is accessible in your browser. Videos requiring a logged-in account may still fail.
-- **Other YouTube or Instagram error:** Confirm the creator username and that the posts are accessible in your browser. Some videos require a logged-in account.
-- **Merging or format error:** Install the latest Clipnest setup. It includes FFmpeg to combine YouTube's separate video and audio streams, and Node.js for YouTube's JavaScript challenges.
-- **YouTube DNS error (`getaddrinfo failed`):** Windows could not find YouTube's video server. Check this PC's network, VPN, and DNS settings. Clipnest uses IPv4 for YouTube, but cannot repair a broken DNS connection.
-- **YouTube HTTP 403:** YouTube refused a video request. Try one creator at a time and check the YouTube cookie setting on this PC. Some videos may remain unavailable.
+- **TikTok profile cannot be read:** Confirm the creator folder name and try fresh cookies. Clipnest also checks TikTok's public creator embed when the standard profile lookup fails.
+- **YouTube page needs to be reloaded:** Clipnest retries public Shorts without saved cookies. If the retry fails, check that the creator and Shorts page open in the browser on that PC.
+- **Requested format is not available:** Use the new setup, which bundles FFmpeg. Some individual videos may still have restricted formats.
+- **`getaddrinfo failed` or DNS:** Windows could not resolve a video server. Check the PC's internet, DNS, VPN, and firewall. The app cannot fix a failed network lookup.
+- **HTTP 403:** The platform refused that video request. Try one creator at a time and refresh that platform's cookies. Some videos remain unavailable.
 
-The queue shows the error for each creator. You can retry a failed folder after changing its settings.
+The selected queue row shows the actual error. Retry after changing the relevant setting. Download content only when you have permission and follow the platform's rules.

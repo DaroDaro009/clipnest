@@ -1,32 +1,28 @@
 # Build Clipnest for Windows
 
-## Requirements
+The release is a native Tkinter application packaged by PyInstaller. It does not use Tauri or WebView2.
 
-- 64-bit Windows with Microsoft C++ build tools and WebView2
-- Node.js and npm
-- Rust with the `x86_64-pc-windows-msvc` target
-- Python 3.12 or newer and pip
+## Local build
 
-From the project root, run:
+Requirements: 64-bit Windows, Python 3.12, Node.js 22 or newer, and NSIS for the setup installer. From the project root:
 
 ```powershell
 python -m pip install -r requirements.txt pyinstaller
-npm ci
 python -m unittest discover -s tests -v
-python build_sidecar.py
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare_windows_runtime.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare_ffmpeg.ps1
-npm run tauri build
+python build_native.py
+Push-Location installer
+makensis /DAPP_VERSION=0.2.0 clipnest.nsi
+Pop-Location
 ```
 
-The Windows setup file is written to `src-tauri/target/release/bundle/nsis/`. `build_sidecar.py` first packages `web_app.py` as a windowless executable inside the installer. The runtime preparation scripts bundle Node.js and a pinned LGPL FFmpeg build, with their license files. FFmpeg combines separate YouTube video and audio streams. The installed Tauri app starts the service on a private localhost port and stops it when the window closes.
+The portable app is `dist/Clipnest.exe`; the setup file is `dist/Clipnest_0.2.0_x64-setup.exe`. Both contain the same Python downloader, yt-dlp, Node.js, and FFmpeg. PyInstaller uses `--windowed`, so the user sees no terminal window. The installer adds a Start menu shortcut and an uninstaller.
 
-The bundled FFmpeg comes from [BtbN's 23 September 2026 LGPL build](https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2026-09-23-14-55). Its [build scripts](https://github.com/BtbN/FFmpeg-Builds) and [FFmpeg source](https://github.com/FFmpeg/FFmpeg/tree/n8.1.3) are publicly available. The build script checks the archive's SHA-256 before packaging it.
+The runtime preparation scripts copy Node.js from the build PC and verify a pinned LGPL FFmpeg archive before packaging it. FFmpeg's license is bundled. The [FFmpeg build scripts](https://github.com/BtbN/FFmpeg-Builds) and [source](https://github.com/FFmpeg/FFmpeg/tree/n8.1.3) are available online.
 
-Never commit `.clipnest-cookies.dat`, `.clipnest-root.txt`, `.clipnest-tiktok-ids.json`, downloaded videos, `.vendor/`, `.build-tools/`, or the generated installer. The setup file belongs on a GitHub Release, not in the source tree.
+## GitHub release
 
-## GitHub release workflow
+The **Native Windows release** workflow in `.github/workflows/windows-release.yml` builds and publishes both EXEs from a Windows runner. Update the version in the workflow and NSIS script for the next release, commit, and run the workflow from the Actions tab. Check its test and build results before sharing the release URL.
 
-The workflow in `.github/workflows/windows-release.yml` can be started from the repository's **Actions** tab. It installs dependencies on a Windows runner, runs the tests, builds the Python sidecar and Tauri installer, and uploads the installer to a release named for the version in `src-tauri/tauri.conf.json`.
-
-For a new release, update the version in `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`, and `package.json`, commit the changes, then run the workflow. `package-lock.json` and `src-tauri/Cargo.lock` should be updated with the same version. Keep user cookies and selected folders out of the release.
+Do not commit cookie stores, selected folder paths, downloaded videos, `.vendor/`, `.build-tools/`, `src-tauri/binaries/`, or `dist/`. The app stores each user's settings under `%LOCALAPPDATA%\Clipnest` on the installed PC.

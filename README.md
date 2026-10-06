@@ -1,24 +1,21 @@
 # Clipnest
 
-Clipnest is a Windows desktop app that saves videos from selected TikTok, YouTube Shorts, and Instagram creator folders. It shows each folder's video count, puts folders with zero videos first, and displays download progress. The desktop app uses Tauri and starts its local downloader without a terminal window.
+Clipnest is a native Python desktop app for downloading public TikTok, YouTube Shorts, and Instagram creator videos into existing username folders. It uses Tkinter for the window and yt-dlp for downloads. No browser window, local web server, Tauri, or terminal is needed for the Windows release.
 
-## Download for Windows
+## Windows download
 
-Get **Clipnest Setup.exe** from the [latest GitHub release](https://github.com/DaroDaro009/clipnest/releases/latest). Run the setup file, then open Clipnest from the Start menu. You do not need to install Python, Node.js, or Rust; the YouTube JavaScript runtime is bundled.
+The [latest release](https://github.com/DaroDaro009/clipnest/releases/latest) includes a Windows setup EXE and a portable EXE. The app bundles yt-dlp, Node.js, and FFmpeg, so another PC does not need Python installed. See the [user guide](docs/USER_GUIDE.md).
 
-See the [user guide](docs/USER_GUIDE.md) for folder setup, cookies, limits, and troubleshooting. Developers can use the [build guide](docs/BUILDING.md).
+## Creator folder workflow
 
-## How it works
+1. Make a root folder with one subfolder per creator username. For example, `Videos/ethan.hunt398/` maps to `https://www.tiktok.com/@ethan.hunt398` when TikTok is selected.
+2. Choose the root folder and platform. YouTube maps the folder name to the creator's Shorts tab.
+3. Select folders. The list shows existing video counts and sorts folders with fewer videos first. Use **Select all**, **Select under video limit**, or **Copy username**.
+4. Set the per-creator limit and concurrency, then click **Download selected**. The queue shows the current video title, progress, result, and full error detail. **Stop downloads** interrupts active jobs and clears waiting work.
+5. Videos are saved in their creator folders using their titles. Repeated titles receive `(2)`, `(3)`, and so on. An archive file records downloaded IDs to avoid repeats.
 
-1. Make a root folder with one subfolder per creator. For example, `Videos/ethan.hunt398/` is the TikTok creator `https://www.tiktok.com/@ethan.hunt398`.
-2. Choose that root folder in Clipnest and select TikTok, YouTube, or Instagram.
-3. Select creator folders, use **Copy** beside a folder to copy its username, set the number of videos per creator and concurrent downloads, then start the queue.
-4. Videos are saved into their existing creator folders using video titles. Repeated titles get `(2)`, `(3)`, and so on. The app remembers downloaded video IDs to avoid duplicates.
+Cookies can be read from a browser, selected from a `cookies.txt` file, or pasted into the app. Pasted settings are saved with Windows account encryption. Cookies and downloaded videos are never included in a release.
 
-YouTube uses creator **Shorts** pages only. If YouTube rejects saved cookies with a "page needs to be reloaded" error, Clipnest retries public Shorts without cookies. YouTube may still restrict some videos. TikTok sometimes blocks its main profile page; Clipnest then tries the public creator embed, which may expose only recent public posts. Some profiles or videos cannot be accessed even with cookies. Instagram profile extraction can also fail when its site changes.
+Run from source with `python downloader.py` after installing `requirements.txt`. The [build guide](docs/BUILDING.md) explains Windows packaging. The older web and Tauri code remains in the repository as reference; the release workflow builds the native Python app.
 
-Download only content you have permission to save and follow each platform's rules.
-
-## Source and releases
-
-The interface is in `web/`, the Python downloader is `web_app.py`, and the Tauri desktop wrapper is in `src-tauri/`. A Windows GitHub Actions workflow can build the setup file for future releases. Local cookies, selected folders, downloaded videos, and build tools are excluded from the repository.
+Download content only when you have permission and follow the platform's rules. Individual profiles and videos can still fail when a platform blocks access or the PC cannot reach its video servers.

@@ -1,4 +1,4 @@
-name: Windows release
+name: Native Windows release
 
 on:
   workflow_dispatch:
@@ -10,41 +10,42 @@ jobs:
   build-and-release:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-      - name: Install dependencies
-        run: |
-          python -m pip install -r requirements.txt pyinstaller
-          npm ci
-      - name: Test workflow
+      - name: Install Python packages
+        run: python -m pip install -r requirements.txt pyinstaller
+      - name: Test downloader
         run: python -m unittest discover -s tests -v
-      - name: Build hidden downloader
-        run: python build_sidecar.py
       - name: Bundle YouTube JavaScript runtime
         shell: pwsh
         run: ./scripts/prepare_windows_runtime.ps1
-      - name: Bundle video merger
+      - name: Bundle FFmpeg
         shell: pwsh
         run: ./scripts/prepare_ffmpeg.ps1
-      - name: Build and publish installer
-        uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build native app
+        run: python build_native.py
+      - name: Build Windows setup
+        shell: pwsh
+        run: |
+          choco install nsis --no-progress -y
+          Push-Location installer
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' /DAPP_VERSION=0.2.0 clipnest.nsi
+          Pop-Location
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: v__VERSION__
-          releaseName: Clipnest v__VERSION__
-          releaseBody: |
-            Windows setup: download the x64 `.exe` under Assets, run it, and open Clipnest from the Start menu.
-            See docs/USER_GUIDE.md for folder setup and troubleshooting.
-          releaseDraft: false
-          prerelease: false
+          tag_name: v0.2.0
+          name: Clipnest v0.2.0 — native Python desktop
+          body: |
+            Windows: download Clipnest_0.2.0_x64-setup.exe, install it, and open Clipnest from the Start menu.
+            The portable Clipnest.exe is also available. Both include yt-dlp, Node.js, and FFmpeg.
+            See docs/USER_GUIDE.md for folder setup, cookies, and troubleshooting.
+          files: |
+            dist/Clipnest.exe
+            dist/Clipnest_0.2.0_x64-setup.exe
